@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Storm Slot - PixiJS Demo</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+    
+    #game-container {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 
+        0 0 60px rgba(255, 215, 0, 0.3),
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        inset 0 0 100px rgba(255, 215, 0, 0.1);
+    }
+    
+    #ui-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 20px;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 70%, transparent 100%);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .info-panel {
+      color: #ffd700;
+      text-align: center;
+    }
+    
+    .info-panel .label {
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .info-panel .value {
+      font-size: 24px;
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+    
+    #spin-btn {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid #ffd700;
+      background: linear-gradient(145deg, #e6b800, #cc9900);
+      color: #1a1a2e;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 
+        0 6px 20px rgba(0,0,0,0.4),
+        0 0 30px rgba(255, 215, 0, 0.4),
+        inset 0 -4px 10px rgba(0,0,0,0.2);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    #spin-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 
+        0 8px 30px rgba(0,0,0,0.5),
+        0 0 50px rgba(255, 215, 0, 0.6),
+        inset 0 -4px 10px rgba(0,0,0,0.2);
+    }
+    
+    #spin-btn:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+    
+    #spin-btn:disabled {
+      background: linear-gradient(145deg, #666, #444);
+      border-color: #666;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    
+    .bet-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .bet-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #ffd700;
+      background: transparent;
+      color: #ffd700;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .bet-btn:hover {
+      background: rgba(255, 215, 0, 0.2);
+    }
+    
+    #win-display {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 72px;
+      font-weight: bold;
+      color: #ffd700;
+      text-shadow: 
+        0 0 20px #ffd700,
+        0 0 40px #ff6600,
+        0 0 60px #ff0000;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    #paytable {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.8);
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #ffd700;
+      color: #fff;
+      font-size: 12px;
+    }
+    
+    #paytable h3 {
+      color: #ffd700;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    
+    .paytable-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 5px 0;
+      gap: 20px;
+    }
+    
+    .paytable-row span:last-child {
+      color: #ffd700;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+    
+    <div id="paytable">
+      <h3>賠率表</h3>
+      <div class="paytable-row"><span>💎💎💎💎💎</span><span>x100</span></div>
+      <div class="paytable-row"><span>7️⃣7️⃣7️⃣7️⃣7️⃣</span><span>x50</span></div>
+      <div class="paytable-row"><span>⭐⭐⭐⭐⭐</span><span>x25</span></div>
+      <div class="paytable-row"><span>🍒🍒🍒🍒🍒</span><span>x10</span></div>
+      <div class="paytable-row"><span>3 個以上相同</span><span>x2-x5</span></div>
+    </div>
+    
+    <div id="win-display">WIN!</div>
+    
+    <div id="ui-overlay">
+      <div class="info-panel">
+        <div class="label">餘額</div>
+        <div class="value" id="balance">1000</div>
+      </div>
+      
+      <div class="bet-controls">
+        <button class="bet-btn" id="bet-down">−</button>
+        <div class="info-panel">
+          <div class="label">下注</div>
+          <div class="value" id="bet-amount">10</div>
+        </div>
+        <button class="bet-btn" id="bet-up">+</button>
+      </div>
+      
+      <button id="spin-btn">SPIN</button>
+      
+      <div class="info-panel">
+        <div class="label">贏得</div>
+        <div class="value" id="last-win">0</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // 遊戲配置
+    // ============================================
+    const CONFIG = {
+      width: 900,
+      height: 600,
+      reelCount: 5,
+      rowCount: 3,
+      symbolSize: 100,
+      reelWidth: 120,
+      spinDuration: 0.5,      // 每個 reel 轉動時間
+      spinDelay: 0.15,        // reel 之間的延遲
+      symbols: ['🍒', '🍋', '🍊', '🍇', '⭐', '7️⃣', '💎'],
+      payouts: {
+        '💎': { 3: 10, 4: 25, 5: 100 },
+        '7️⃣': { 3: 5, 4: 15, 5: 50 },
+        '⭐': { 3: 4, 4: 10, 5: 25 },
+        '🍇': { 3: 3, 4: 6, 5: 15 },
+        '🍊': { 3: 2, 4: 4, 5: 10 },
+        '🍋': { 3: 2, 4: 3, 5: 8 },
+        '🍒': { 3: 1, 4: 2, 5: 5 }
+      }
+    };
+
+    // ============================================
+    // 遊戲狀態
+    // ============================================
+    let balance = 1000;
+    let betAmount = 10;
+    let isSpinning = false;
+    let reels = [];
+    let reelContainers = [];
+
+    // ============================================
+    // 初始化 PixiJS
+    // ============================================
+    const app = new PIXI.Application({
+      view: document.getElementById('game-canvas'),
+      width: CONFIG.width,
+      height: CONFIG.height,
+      backgroundColor: 0x1a1a2e,
+      antialias: true
+    });
+
+    // ============================================
+    // 創建背景
+    // ============================================
+    function createBackground() {
+      const bg = new PIXI.Graphics();
+      
+      // 漸層背景
+      bg.beginFill(0x0f3460);
+      bg.drawRect(0, 0, CONFIG.width, CONFIG.height);
+      bg.endFill();
+      
+      // 裝飾線條
+      bg.lineStyle(2, 0xffd700, 0.3);
+      for (let i = 0; i < 10; i++) {
+        bg.moveTo(0, i * 70);
+        bg.lineTo(CONFIG.width, i * 70 + 100);
+      }
+      
+      app.stage.addChild(bg);
+    }
+
+    // ============================================
+    // 創建轉輪框架
+    // ============================================
+    function createReelFrame() {
+      const frame = new PIXI.Graphics();
+      
+      const startX = (CONFIG.width - CONFIG.reelCount * CONFIG.reelWidth) / 2 - 20;
+      const startY = 60;
+      const frameWidth = CONFIG.reelCount * CONFIG.reelWidth + 40;
+      const frameHeight = CONFIG.rowCount * CONFIG.symbolSize + 40;
+      
+      // 外框陰影
+      frame.beginFill(0x000000, 0.5);
+      frame.drawRoundedRect(startX + 5, startY + 5, frameWidth, frameHeight, 15);
+      frame.endFill();
+      
+      // 主框架
+      frame.beginFill(0x2a2a4a);
+      frame.lineStyle(4, 0xffd700, 1);
+      frame.drawRoundedRect(startX, startY, frameWidth, frameHeight, 15);
+      frame.endFill();
+      
+      // 內部深色區域
+      frame.beginFill(0x0a0a1a);
+      frame.drawRoundedRect(startX + 15, startY + 15, frameWidth - 30, frameHeight - 30, 10);
+      frame.endFill();
+      
+      app.stage.addChild(frame);
+      
+      return { startX: startX + 20, startY: startY + 20 };
+    }
+
+    // ============================================
+    // 創建符號文字
+    // ============================================
+    function createSymbol(symbol, x, y) {
+      const text = new PIXI.Text(symbol, {
+        fontFamily: 'Segoe UI Emoji, Apple Color Emoji, sans-serif',
+        fontSize: 64,
+        align: 'center'
+      });
+      text.anchor.set(0.5);
+      text.x = x;
+      text.y = y;
+      return text;
+    }
+
+    // ============================================
+    // 創建轉輪
+    // ============================================
+    function createReels(framePos) {
+      const reelStartX = framePos.startX + CONFIG.reelWidth / 2;
+      const reelStartY = framePos.startY;
+      
+      for (let i = 0; i < CONFIG.reelCount; i++) {
+        const container = new PIXI.Container();
+        container.x = reelStartX + i * CONFIG.reelWidth;
+        container.y = reelStartY;
+        
+        // 創建遮罩
+        const mask = new PIXI.Graphics();
+        mask.beginFill(0xffffff);
+        mask.drawRect(
+          -CONFIG.reelWidth / 2,
+          0,
+          CONFIG.reelWidth,
+          CONFIG.rowCount * CONFIG.symbolSize
+        );
+        mask.endFill();
+        container.addChild(mask);
+        container.mask = mask;
+        
+        // 創建符號 (多創建幾個用於動畫)
+        const reel = {
+          container,
+          symbols: [],
+          position: 0,
+          previousPosition: 0,
+          blur: new PIXI.BlurFilter()
+        };
+        
+        reel.blur.blurX = 0;
+        reel.blur.blurY = 0;
+        container.filters = [reel.blur];
+        
+        // 創建符號精靈
+        for (let j = 0; j < CONFIG.rowCount + 2; j++) {
+          const symbolIndex = Math.floor(Math.random() * CONFIG.symbols.length);
+          const symbol = createSymbol(
+            CONFIG.symbols[symbolIndex],
+            0,
+            j * CONFIG.symbolSize + CONFIG.symbolSize / 2
+          );
+          symbol.symbolIndex = symbolIndex;
+          container.addChild(symbol);
+          reel.symbols.push(symbol);
+        }
+        
+        reels.push(reel);
+        reelContainers.push(container);
+        app.stage.addChild(container);
+      }
+    }
+
+    // ============================================
+    // 創建中線指示器
+    // ============================================
+    function createPaylineIndicator(framePos) {
+      const indicator = new PIXI.Graphics();
+      
+      const y = framePos.startY + CONFIG.symbolSize * 1.5;
+      
+      // 左箭頭
+      indicator.beginFill(0xffd700);
+      indicator.moveTo(framePos.startX - 15, y);
+      indicator.lineTo(framePos.startX - 5, y - 10);
+      indicator.lineTo(framePos.startX - 5, y + 10);
+      indicator.closePath();
+      indicator.endFill();
+      
+      // 右箭頭
+      const rightX = framePos.startX + CONFIG.reelCount * CONFIG.reelWidth;
+      indicator.beginFill(0xffd700);
+      indicator.moveTo(rightX + 15, y);
+      indicator.lineTo(rightX + 5, y - 10);
+      indicator.lineTo(rightX + 5, y + 10);
+      indicator.closePath();
+      indicator.endFill();
+      
+      app.stage.addChild(indicator);
+    }
+
+    // ============================================
+    // 轉動動畫
+    // ============================================
+    async function spin() {
+      if (isSpinning || balance < betAmount) return;
+      
+      isSpinning = true;
+      document.getElementById('spin-btn').disabled = true;
+      
+      // 扣除下注金額
+      balance -= betAmount;
+      updateUI();
+      
+      // 預先決定結果
+      const results = [];
+      for (let i = 0; i < CONFIG.reelCount; i++) {
+        const reelResult = [];
+        for (let j = 0; j < CONFIG.rowCount; j++) {
+          reelResult.push(Math.floor(Math.random() * CONFIG.symbols.length));
+        }
+        results.push(reelResult);
+      }
+      
+      // 轉動每個轉輪
+      const spinPromises = reels.map((reel, i) => {
+        return new Promise(resolve => {
+          setTimeout(() => {
+            spinReel(reel, i, results[i]).then(resolve);
+          }, i * CONFIG.spinDelay * 1000);
+        });
+      });
+      
+      await Promise.all(spinPromises);
+      
+      // 檢查中獎
+      const winAmount = checkWin(results);
+      
+      if (winAmount > 0) {
+        balance += winAmount;
+        document.getElementById('last-win').textContent = winAmount;
+        showWinAnimation(winAmount);
+      } else {
+        document.getElementById('last-win').textContent = '0';
+      }
+      
+      updateUI();
+      isSpinning = false;
+      document.getElementById('spin-btn').disabled = false;
+    }
+
+    // ============================================
+    // 單個轉輪動畫
+    // ============================================
+    function spinReel(reel, reelIndex, finalSymbols) {
+      return new Promise(resolve => {
+        const spinCycles = 2 + reelIndex; // 後面的轉輪轉更久
+        let currentCycle = 0;
+        let position = 0;
+        
+        // 添加模糊效果
+        gsap.to(reel.blur, {
+          blurY: 15,
+          duration: 0.2
+        });
+        
+        const ticker = () => {
+          position += 25; // 移動速度
+          
+          // 更新符號位置
+          reel.symbols.forEach((symbol, i) => {
+            symbol.y = ((i * CONFIG.symbolSize + CONFIG.symbolSize / 2 - position) % 
+                       ((CONFIG.rowCount + 2) * CONFIG.symbolSize));
+            if (symbol.y < 0) symbol.y += (CONFIG.rowCount + 2) * CONFIG.symbolSize;
+            
+            // 隨機更換符號
+            if (symbol.y > CONFIG.rowCount * CONFIG.symbolSize) {
+              symbol.symbolIndex = Math.floor(Math.random() * CONFIG.symbols.length);
+              symbol.text = CONFIG.symbols[symbol.symbolIndex];
+            }
+          });
+          
+          // 檢查是否完成一圈
+          if (position >= CONFIG.symbolSize * (CONFIG.rowCount + 2)) {
+            position = 0;
+            currentCycle++;
+            
+            if (currentCycle >= spinCycles) {
+              app.ticker.remove(ticker);
+              
+              // 設置最終結果
+              finalSymbols.forEach((symbolIndex, i) => {
+                reel.symbols[i].symbolIndex = symbolIndex;
+                reel.symbols[i].text = CONFIG.symbols[symbolIndex];
+                reel.symbols[i].y = i * CONFIG.symbolSize + CONFIG.symbolSize / 2;
+              });
+              
+              // 移除模糊
+              gsap.to(reel.blur, {
+                blurY: 0,
+                duration: 0.2
+              });
+              
+              // 彈跳效果
+              gsap.to(reel.container, {
+                y: reel.container.y + 10,
+                duration: 0.1,
+                yoyo: true,
+                repeat: 1,
+                ease: 'power2.out',
+                onComplete: resolve
+              });
+            }
+          }
+        };
+        
+        app.ticker.add(ticker);
+      });
+    }
+
+    // ============================================
+    // 檢查中獎
+    // ============================================
+    function checkWin(results) {
+      let totalWin = 0;
+      
+      // 檢查中間行（主要賠付線）
+      const middleRow = results.map(reel => reel[1]);
+      
+      // 計算連續相同符號
+      let currentSymbol = middleRow[0];
+      let count = 1;
+      
+      for (let i = 1; i < middleRow.length; i++) {
+        if (middleRow[i] === currentSymbol) {
+          count++;
+        } else {
+          // 檢查是否中獎
+          if (count >= 3) {
+            const symbolName = CONFIG.symbols[currentSymbol];
+            const payout = CONFIG.payouts[symbolName];
+            if (payout && payout[count]) {
+              totalWin += payout[count] * betAmount;
+            }
+          }
+          currentSymbol = middleRow[i];
+          count = 1;
+        }
+      }
+      
+      // 檢查最後一組
+      if (count >= 3) {
+        const symbolName = CONFIG.symbols[currentSymbol];
+        const payout = CONFIG.payouts[symbolName];
+        if (payout && payout[count]) {
+          totalWin += payout[count] * betAmount;
+        }
+      }
+      
+      return totalWin;
+    }
+
+    // ============================================
+    // 中獎動畫
+    // ============================================
+    function showWinAnimation(amount) {
+      const winDisplay = document.getElementById('win-display');
+      winDisplay.textContent = `+${amount}`;
+      
+      gsap.timeline()
+        .to(winDisplay, {
+          opacity: 1,
+          scale: 1.5,
+          duration: 0.3,
+          ease: 'back.out'
+        })
+        .to(winDisplay, {
+          opacity: 0,
+          scale: 1,
+          duration: 0.5,
+          delay: 1,
+          ease: 'power2.in'
+        });
+      
+      // 符號閃爍效果
+      reels.forEach(reel => {
+        reel.symbols.forEach(symbol => {
+          gsap.to(symbol, {
+            alpha: 0.5,
+            duration: 0.1,
+            yoyo: true,
+            repeat: 5
+          });
+        });
+      });
+    }
+
+    // ============================================
+    // 更新 UI
+    // ============================================
+    function updateUI() {
+      document.getElementById('balance').textContent = balance;
+      document.getElementById('bet-amount').textContent = betAmount;
+    }
+
+    // ============================================
+    // 事件綁定
+    // ============================================
+    function bindEvents() {
+      document.getElementById('spin-btn').addEventListener('click', spin);
+      
+      document.getElementById('bet-up').addEventListener('click', () => {
+        if (!isSpinning && betAmount < balance) {
+          betAmount = Math.min(betAmount + 10, 100);
+          updateUI();
+        }
+      });
+      
+      document.getElementById('bet-down').addEventListener('click', () => {
+        if (!isSpinning && betAmount > 10) {
+          betAmount = Math.max(betAmount - 10, 10);
+          updateUI();
+        }
+      });
+      
+      // 空白鍵也可以轉
+      document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+          e.preventDefault();
+          spin();
+        }
+      });
+    }
+
+    // ============================================
+    // 初始化遊戲
+    // ============================================
+    function init() {
+      createBackground();
+      const framePos = createReelFrame();
+      createReels(framePos);
+      createPaylineIndicator(framePos);
+      bindEvents();
+      updateUI();
+      
+      console.log('🎰 Slot Game Initialized!');
+    }
+
+    init();
+  </script>
+</body>
+</html>

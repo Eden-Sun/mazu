@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mazu Games 🌊</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+    }
+    h1 {
+      font-size: 48px;
+      color: #ffd700;
+      text-shadow: 0 0 20px rgba(255,215,0,0.5);
+      margin-bottom: 12px;
+    }
+    p.subtitle {
+      color: #888;
+      margin-bottom: 48px;
+      font-size: 16px;
+    }
+    .games {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .game-card {
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,215,0,0.3);
+      border-radius: 16px;
+      padding: 32px 40px;
+      text-align: center;
+      text-decoration: none;
+      color: #fff;
+      transition: all 0.3s ease;
+      min-width: 200px;
+    }
+    .game-card:hover {
+      border-color: #ffd700;
+      background: rgba(255,215,0,0.1);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(255,215,0,0.2);
+    }
+    .game-card .icon { font-size: 56px; margin-bottom: 16px; }
+    .game-card .name { font-size: 20px; font-weight: bold; color: #ffd700; }
+    .game-card .desc { font-size: 13px; color: #888; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>🌊 Mazu Games</h1>
+  <p class="subtitle">媽祖保佑，逢賭必贏</p>
+  <div class="games">
+    <a href="slot-game.html" class="game-card">
+      <div class="icon">🎰</div>
+      <div class="name">Storm Slot</div>
+      <div class="desc">5 轉輪老虎機</div>
+    </a>
+  </div>
+</body>
+</html>
