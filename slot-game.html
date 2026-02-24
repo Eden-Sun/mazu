@@ -74,6 +74,7 @@
     #mazu-img{
       display:block;
       object-fit:contain;object-position:top;
+      transition:opacity 0.3s ease;
       filter:sepia(0.15) saturate(1.35) brightness(1.08) contrast(1.05)
         drop-shadow(0 0 18px rgba(255,215,0,0.55))
         drop-shadow(0 0 40px rgba(255,120,0,0.35))
@@ -300,6 +301,17 @@
             text-align:center;padding:0 16px;}
     .fi-ring{position:absolute;border-radius:50%;border:3px solid rgba(255,215,0,0.6);pointer-events:none;}
 
+    /* ── Image switch button ── */
+    #img-switch-btn{
+      position:fixed;top:48px;left:8px;z-index:100;
+      background:rgba(20,0,0,0.75);border:1.5px solid #ffd700;
+      border-radius:14px;padding:4px 10px;
+      color:#ffd700;font-size:16px;cursor:pointer;
+      box-shadow:0 2px 8px rgba(0,0,0,0.5);
+      touch-action:manipulation;transition:all 0.15s;
+    }
+    #img-switch-btn:active{transform:scale(0.9);background:rgba(60,10,0,0.9);}
+
     /* ── HTML particles ── */
     .pt{position:fixed;pointer-events:none;z-index:999;}
   </style>
@@ -332,6 +344,7 @@
 </div>
 
 <div id="free-counter">🎁 免費遊戲<br><span id="free-count">10</span> 局剩餘</div>
+<button id="img-switch-btn">🖼️</button>
 <button id="pt-btn" onclick="document.getElementById('paytable').classList.toggle('show')">📋 賠率</button>
 <div id="paytable">
   <h3>🌺 媽祖賠率表（All Ways）</h3>
@@ -940,6 +953,20 @@ document.getElementById('bet-down').addEventListener('click', () => { if (!spinn
 document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); spin(); } });
 
 updateUI();
+
+// ── Image switch ──
+(function(){
+  const imgs=['mazu-statue.jpg','mazu-cartoon.jpg'];
+  const img=document.getElementById('mazu-img');
+  const pref=localStorage.getItem('mazuImgPref');
+  if(pref&&imgs.includes(pref)) img.src=pref;
+  document.getElementById('img-switch-btn').addEventListener('click',()=>{
+    const next=img.src.endsWith(imgs[0])?imgs[1]:imgs[0];
+    img.style.opacity='0';
+    setTimeout(()=>{img.src=next;img.style.opacity='1';localStorage.setItem('mazuImgPref',next);},300);
+  });
+})();
+
 console.log(`🌺 媽祖 Ready | Canvas:${CANVAS_W}×${CANVAS_H} | Sym:${SYM_W}×${SYM_H} | ${IS_SM?'SM':IS_TAB?'TAB':'DT'}`);
 </script>
 </body>
