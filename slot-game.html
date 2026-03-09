@@ -348,16 +348,16 @@
 <button id="pt-btn" onclick="document.getElementById('paytable').classList.toggle('show')">📋 賠率</button>
 <div id="paytable">
   <h3>🌺 媽祖賠率表（All Ways）</h3>
-  <div class="pt-row"><span>💠 媽祖</span><span class="pt-pays">3×50 | 4×200 | 5×1000</span></div>
-  <div class="pt-row"><span>🌙 月娥</span><span class="pt-pays">3×20 | 4×80  | 5×400</span></div>
-  <div class="pt-row"><span>⚡ 千里眼</span><span class="pt-pays">3×10 | 4×40  | 5×200</span></div>
-  <div class="pt-row"><span>🌊 順風耳</span><span class="pt-pays">3×8  | 4×30  | 5×150</span></div>
-  <div class="pt-row"><span>🏮 宮燈</span><span class="pt-pays">3×5  | 4×20  | 5×80</span></div>
-  <div class="pt-row"><span>🐉 龍</span><span class="pt-pays">3×3  | 4×12  | 5×50</span></div>
-  <div class="pt-row"><span>🌸 蓮花</span><span class="pt-pays">3×2  | 4×8   | 5×30</span></div>
-  <div class="pt-row"><span>🔱 三叉戟</span><span class="pt-pays">3×1  | 4×4   | 5×15</span></div>
-  <div class="pt-row"><span>♦ 符牌</span><span class="pt-pays">3×0.5| 4×1.5 | 5×5</span></div>
-  <div class="pt-note">賠率 × 中獎路數 × 投注｜RTP ≈ 102%</div>
+  <div class="pt-row"><span>💠 媽祖</span><span class="pt-pays">3×0.35 | 4×1.40 | 5×7.00</span></div>
+  <div class="pt-row"><span>🌙 月娥</span><span class="pt-pays">3×0.15 | 4×0.55 | 5×2.80</span></div>
+  <div class="pt-row"><span>⚡ 千里眼</span><span class="pt-pays">3×0.07 | 4×0.28 | 5×1.40</span></div>
+  <div class="pt-row"><span>🌊 順風耳</span><span class="pt-pays">3×0.06 | 4×0.20 | 5×1.00</span></div>
+  <div class="pt-row"><span>🏮 宮燈</span><span class="pt-pays">3×0.04 | 4×0.14 | 5×0.55</span></div>
+  <div class="pt-row"><span>🐉 龍</span><span class="pt-pays">3×0.025| 4×0.09 | 5×0.40</span></div>
+  <div class="pt-row"><span>🌸 蓮花</span><span class="pt-pays">3×0.015| 4×0.06 | 5×0.20</span></div>
+  <div class="pt-row"><span>🔱 三叉戟</span><span class="pt-pays">3×0.007| 4×0.03 | 5×0.10</span></div>
+  <div class="pt-row"><span>♦ 符牌</span><span class="pt-pays">3×0.004| 4×0.01 | 5×0.036</span></div>
+  <div class="pt-note">賠率 × 中獎路數 × 投注｜RTP ≈ 94%</div>
 </div>
 
 <!-- ── Main game wrap ── -->
@@ -532,15 +532,15 @@ for (let i = 0; i < 60; i++) {
 
 // ── Symbols ──
 const SYMS = [
-  {id:0,e:'💠',w:1,  pays:[0,0,0,50, 200,1000],tier:4},
-  {id:1,e:'🌙',w:2,  pays:[0,0,0,20, 80, 400 ],tier:4},
-  {id:2,e:'⚡',w:3,  pays:[0,0,0,10, 40, 200 ],tier:3},
-  {id:3,e:'🌊',w:4,  pays:[0,0,0,8,  30, 150 ],tier:3},
-  {id:4,e:'🏮',w:5,  pays:[0,0,0,5,  20, 80  ],tier:2},
-  {id:5,e:'🐉',w:6,  pays:[0,0,0,3,  12, 50  ],tier:2},
-  {id:6,e:'🌸',w:8,  pays:[0,0,0,2,  8,  30  ],tier:1},
-  {id:7,e:'🔱',w:10, pays:[0,0,0,1,  4,  15  ],tier:1},
-  {id:8,e:'♦', w:15, pays:[0,0,0,0.5,1.5,5   ],tier:0},
+  {id:0,e:'💠',w:1,  pays:[0,0,0,0.35, 1.40, 7.00 ],tier:4},
+  {id:1,e:'🌙',w:2,  pays:[0,0,0,0.15, 0.55, 2.80 ],tier:4},
+  {id:2,e:'⚡',w:3,  pays:[0,0,0,0.07, 0.28, 1.40 ],tier:3},
+  {id:3,e:'🌊',w:4,  pays:[0,0,0,0.06, 0.20, 1.00 ],tier:3},
+  {id:4,e:'🏮',w:5,  pays:[0,0,0,0.04, 0.14, 0.55 ],tier:2},
+  {id:5,e:'🐉',w:6,  pays:[0,0,0,0.025,0.09, 0.40 ],tier:2},
+  {id:6,e:'🌸',w:8,  pays:[0,0,0,0.015,0.06, 0.20 ],tier:1},
+  {id:7,e:'🔱',w:10, pays:[0,0,0,0.007,0.03, 0.10 ],tier:1},
+  {id:8,e:'♦', w:15, pays:[0,0,0,0.004,0.01, 0.036],tier:0},
 ];
 const TOT_W = SYMS.reduce((s,x) => s + x.w, 0);
 
@@ -573,6 +573,23 @@ function hasPotential(grid, k) {
     if (ok) return true;
   }
   return false;
+}
+
+// ── Analytics (fire-and-forget; game still works if API is unavailable) ──
+const _uid = (()=>{
+  let id = localStorage.getItem('mazu_uid');
+  if (!id) { id = crypto.randomUUID(); localStorage.setItem('mazu_uid', id); }
+  return id;
+})();
+const _sid = crypto.randomUUID();
+function trackSpin(bet, win, isFree, balAfter) {
+  fetch('/api/spins', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ userId: _uid, sessionId: _sid, bet, win, freeMode: isFree,
+                           ts: Date.now(), balanceAfter: balAfter }),
+    keepalive: true,
+  }).catch(() => {}); // never blocks game
 }
 
 // ── State ──
@@ -745,6 +762,7 @@ async function spin() {
     return;
   }
   spinning = true; setUI(false); resetSymbolAlpha();
+  const _wasFreeMode = freeMode;
   if (!freeMode) { balance -= betAmt; updateUI(); }
 
   const grid = Array.from({length:5}, () => Array.from({length:6}, () => pickSym()));
@@ -786,6 +804,7 @@ async function spin() {
       await endFreeGames();
     }
   }
+  trackSpin(betAmt, won, _wasFreeMode, balance);
   updateUI(); spinning = false; setUI(true);
   if (freeMode && freeLeft > 0) setTimeout(spin, 650);
 }
